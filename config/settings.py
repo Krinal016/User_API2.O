@@ -53,9 +53,9 @@ REST_FRAMEWORK = {
 AUTH_USER_MODEL = 'users.Users'
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': True,  # Keep this False for now
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,  # Keep this False for now
     'BLACKLIST_AFTER_ROTATION': True,  # Ensure refresh tokens are blacklisted
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,  # Ensure this is defined
