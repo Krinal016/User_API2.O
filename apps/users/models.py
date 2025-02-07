@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.utils.text import slugify
 # Create your models here.
 
 class Users(models.Model):
@@ -8,10 +8,6 @@ class Users(models.Model):
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    is_active = models.BooleanField(default=True)  # Required
-    is_staff = models.BooleanField(default=False)  # Required
-    is_superuser = models.BooleanField(default=False) 
     
     USERNAME_FIELD = "email" 
     REQUIRED_FIELDS = []
@@ -26,3 +22,15 @@ class Users(models.Model):
     @property
     def is_anonymous(self):
         return False  
+
+class Blog(models.Model):
+    title = models.CharField(max_length=255, unique=True)
+    content = models.TextField()
+    slug = models.SlugField(unique=True, null=False, blank=True)
+    author = models.ForeignKey(Users, on_delete=models.CASCADE) 
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return self.title

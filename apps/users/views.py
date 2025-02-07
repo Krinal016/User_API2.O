@@ -1,12 +1,16 @@
 from django.shortcuts import render
-from .serializers import UserSerializer
+from .serializers import UserSerializer,BlogSerializer
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,permission_classes
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from .models import Users
+from .models import Users,Blog
 from argon2 import PasswordHasher
+from rest_framework.permissions import IsAuthenticated
+from django.http import JsonResponse
+from django.core import serializers
+import json
 
 ph = PasswordHasher()
 
@@ -87,3 +91,35 @@ def logout(request):
     
     except Exception as e :
         return Response({'error':str(e)},status =status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_blog(request):
+    """Create a new blog post."""
+    user = request.user 
+     
+    request.data['author'] = user.id
+    serializer = BlogSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.validated_data['author'] = user
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def list_blogs(request):
+    list = Blog.objects.all()
+
+    return Response(f"List of Blogs :- {list}")
+
+@api_view(['GET'])
+def search_blog(request, pk):
+    try:
+        blog = Blog.objects.get(slug=pk)
+
+        blog_data = serializers.serialize('json', [blog])
+    
+        blog_data_dict = json.loads(blog_data)
+        return JsonResponse(blog_data_dict, safe=False,status = 200)
+    except Exception as e:
+        return JsonResponse({'error':str(e)},status =status.HTTP_400_BAD_REQUEST)
